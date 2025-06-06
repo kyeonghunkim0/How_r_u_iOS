@@ -84,13 +84,24 @@ extension MainViewController: UIImagePickerControllerDelegate{
     }
     // 이미지 선택
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let image = info[.originalImage] as? UIImage{
-            self.selectImage = image
+        if let image = info[.originalImage] as? UIImage,
+           let rotateImage = image.rotate(radians: Float.pi * 2){
+            APIService.shared.sendRequest(rotateImage){ result in
+                switch(result){
+                case .success(let response):
+                    let data = response
+                    print("Result : \(data)")
+                    break
+                case .failure(let error):
+                    print("Error : \(error)")
+                    break
+                }
+            }
         }
     }
     // 이미지 선택 취소
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        print(#function)
+        picker.dismiss(animated: true)
     }
 }
 
@@ -102,10 +113,20 @@ extension MainViewController: CameraViewControllerDelegate{
         cameraViewController.delegate = self
         self.present(cameraViewController, animated: true)
     }
+    
     // 카메라 촬영
     func cameraViewController(_ controller: CameraViewController, didCapture image: UIImage) {
-        self.selectImage = image
-        
+        APIService.shared.sendRequest(image){ result in
+            switch(result){
+            case .success(let response):
+                let data = response
+                print("Result : \(data)")
+                break
+            case .failure(let error):
+                print("Error : \(error)")
+                break
+            }
+        }
     }
     // 카메라 촬영 취소
     func cameraViewControllerDidCancel(_ controller: CameraViewController) {
