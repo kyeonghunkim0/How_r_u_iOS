@@ -266,7 +266,9 @@ class CameraViewController: UIViewController {
     }
     
     @objc private func didTapClose() {
-        delegate?.cameraViewControllerDidCancel(self)
+        self.dismiss(animated: true){
+            self.delegate?.cameraViewControllerDidCancel(self)
+        }
     }
 }
 
@@ -282,11 +284,13 @@ extension CameraViewController: AVCapturePhotoCaptureDelegate {
         }
         // 이미지 회전
         guard let imageData = photo.fileDataRepresentation(),
-              let capturedImage = UIImage(data: imageData)?.rotate(radians: Float.pi) else {
+              let capturedImage = UIImage(data: imageData)?.rotate(radians: Float.pi * 2) else {
             print("이미지 데이터 변환 실패")
             return
         }
         
-        delegate?.cameraViewController(self, didCapture: capturedImage)
+        self.dismiss(animated: true){
+            self.delegate?.cameraViewController(self, didCapture: capturedImage)
+        }
     }
 }

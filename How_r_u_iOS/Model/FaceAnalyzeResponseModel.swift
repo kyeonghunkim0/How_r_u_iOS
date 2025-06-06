@@ -44,3 +44,19 @@ struct EmotionDetail: Decodable{
         case surprise = "Surprise"
     }
 }
+
+extension EmotionDetail {
+    /// 감정 이름과 확률을 key-value로 반환 + value 기준 정렬
+    var sortedEmotion: [(String, Double)] {
+        let dict: [String: Double] = [
+            "Angry" : angry,
+            "Disgust" : disgust,
+            "Fear" : fear,
+            "Happy" : happy,
+            "Neutral" : neutral,
+            "Sad" : sad,
+            "Surprise" : surprise
+        ]
+        return dict.sorted { $0.value > $1.value }
+    }
+}

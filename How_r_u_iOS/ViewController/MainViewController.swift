@@ -8,7 +8,6 @@
 import UIKit
 
 class MainViewController: UIViewController, UINavigationControllerDelegate {
-    var selectImage: UIImage?
     // 로고
     private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
@@ -84,17 +83,30 @@ extension MainViewController: UIImagePickerControllerDelegate{
     }
     // 이미지 선택
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let image = info[.originalImage] as? UIImage,
-           let rotateImage = image.rotate(radians: Float.pi * 2){
-            APIService.shared.sendRequest(rotateImage){ result in
-                switch(result){
-                case .success(let response):
-                    let data = response
-                    print("Result : \(data)")
-                    break
-                case .failure(let error):
-                    print("Error : \(error)")
-                    break
+        picker.dismiss(animated: true){
+            if let image = info[.originalImage] as? UIImage,
+               let rotateImage = image.rotate(radians: Float.pi * 2){
+                APIService.shared.sendRequest(rotateImage){ result in
+                    switch(result){
+                    case .success(let response):
+                        DispatchQueue.main.async {
+                            let data = response
+                            if data.face_count > 1{
+                                self.showAlert(title: "오류", message: "사진에 얼굴이 1명 이상 있습니다.\n사진을 다시 선택해주세요.")
+                            }
+                            else if data.face_count == 0{
+                                self.showAlert(title: "오류", message: "사진에 얼굴이 없습니다.\n사진을 다시 선택해주세요.")
+                            }
+                            else{
+                                let resultViewController = ResultViewController(result: data)
+                                self.navigationController?.pushViewController(resultViewController, animated: true)
+                            }
+                        }
+                        break
+                    case .failure(let error):
+                        print("Error : \(error)")
+                        break
+                    }
                 }
             }
         }
@@ -119,8 +131,19 @@ extension MainViewController: CameraViewControllerDelegate{
         APIService.shared.sendRequest(image){ result in
             switch(result){
             case .success(let response):
-                let data = response
-                print("Result : \(data)")
+                DispatchQueue.main.async {
+                    let data = response
+                    if data.face_count > 1{
+                        self.showAlert(title: "오류", message: "사진에 얼굴이 1명 이상 있습니다.\n사진을 다시 선택해주세요.")
+                    }
+                    else if data.face_count == 0{
+                        self.showAlert(title: "오류", message: "사진에 얼굴이 없습니다.\n사진을 다시 선택해주세요.")
+                    }
+                    else{
+                        let resultViewController = ResultViewController(result: data)
+                        self.navigationController?.pushViewController(resultViewController, animated: true)
+                    }
+                }
                 break
             case .failure(let error):
                 print("Error : \(error)")
@@ -131,5 +154,14 @@ extension MainViewController: CameraViewControllerDelegate{
     // 카메라 촬영 취소
     func cameraViewControllerDidCancel(_ controller: CameraViewController) {
         print(#function)
+    }
+}
+
+extension MainViewController{
+    func showAlert(title: String, message: String){
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "확인", style: .default)
+        alertController.addAction(okAction)
+        self.present(alertController, animated: true)
     }
 }
