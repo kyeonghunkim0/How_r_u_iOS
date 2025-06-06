@@ -8,6 +8,7 @@
 import UIKit
 
 class MainViewController: UIViewController {
+    var selectImage: UIImage?
     // 로고
     private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
@@ -78,9 +79,23 @@ extension MainViewController{
     func didTapSelectButton(){
         print("select button tapped")
     }
-    
+}
+
+extension MainViewController: CameraViewControllerDelegate{
     @objc
     func didTapCaptureButton(){
         print("capture button tapped")
+        let cameraViewController = CameraViewController()
+        cameraViewController.delegate = self
+        self.present(cameraViewController, animated: true)
+    }
+    
+    func cameraViewController(_ controller: CameraViewController, didCapture image: UIImage) {
+        self.selectImage = image
+        
+    }
+    
+    func cameraViewControllerDidCancel(_ controller: CameraViewController) {
+        print(#function)
     }
 }
