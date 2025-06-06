@@ -7,7 +7,7 @@
 
 import UIKit
 
-class MainViewController: UIViewController {
+class MainViewController: UIViewController, UINavigationControllerDelegate {
     var selectImage: UIImage?
     // 로고
     private lazy var logoImageView: UIImageView = {
@@ -74,10 +74,23 @@ class MainViewController: UIViewController {
     }
 }
 
-extension MainViewController{
+extension MainViewController: UIImagePickerControllerDelegate{
     @objc
     func didTapSelectButton(){
         print("select button tapped")
+        let pickerViewController = UIImagePickerController()
+        pickerViewController.delegate = self
+        self.present(pickerViewController, animated: true)
+    }
+    // 이미지 선택
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let image = info[.originalImage] as? UIImage{
+            self.selectImage = image
+        }
+    }
+    // 이미지 선택 취소
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        print(#function)
     }
 }
 
@@ -89,12 +102,12 @@ extension MainViewController: CameraViewControllerDelegate{
         cameraViewController.delegate = self
         self.present(cameraViewController, animated: true)
     }
-    
+    // 카메라 촬영
     func cameraViewController(_ controller: CameraViewController, didCapture image: UIImage) {
         self.selectImage = image
         
     }
-    
+    // 카메라 촬영 취소
     func cameraViewControllerDidCancel(_ controller: CameraViewController) {
         print(#function)
     }
