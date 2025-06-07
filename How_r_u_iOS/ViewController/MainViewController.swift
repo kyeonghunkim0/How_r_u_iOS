@@ -44,6 +44,8 @@ class MainViewController: UIViewController, UINavigationControllerDelegate {
         return stackView
     }()
     
+    let indicatorView = UIActivityIndicatorView(style: .large)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
@@ -83,10 +85,12 @@ extension MainViewController: UIImagePickerControllerDelegate{
     }
     // 이미지 선택
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        LoadingIndicator.showLoading()
         picker.dismiss(animated: true){
             if let image = info[.originalImage] as? UIImage,
                let rotateImage = image.rotate(radians: Float.pi * 2){
                 APIService.shared.sendRequest(rotateImage){ result in
+                    LoadingIndicator.hideLoading()
                     switch(result){
                     case .success(let response):
                         DispatchQueue.main.async {
@@ -104,7 +108,9 @@ extension MainViewController: UIImagePickerControllerDelegate{
                         }
                         break
                     case .failure(let error):
-                        print("Error : \(error)")
+                        DispatchQueue.main.async {
+                            self.showAlert(title: "오류", message: "오류가 발생하였습니다.\n잠시 후 다시 시도해주세요.")
+                        }
                         break
                     }
                 }
@@ -146,7 +152,7 @@ extension MainViewController: CameraViewControllerDelegate{
                 }
                 break
             case .failure(let error):
-                print("Error : \(error)")
+                self.showAlert(title: "오류", message: "오류가 발생하였습니다.\n잠시 후 다시 시도해주세요.")
                 break
             }
         }
