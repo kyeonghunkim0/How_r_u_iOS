@@ -91,13 +91,14 @@ class ResultViewController: UIViewController {
         }
         
         let emotion = response.emotion
-        let currentEmotion = response.emotion.label
+        let currentEmotion = EmotionType(rawValue: response.emotion.label)
+        let resultDescription = (currentEmotion ?? .unknown).descrption
         
         let confidence = emotion.confidence
         let detail = response.emotion.probabilities
         let sortedEmotionPairs = detail.sortedEmotion
         
-        resultLabel.text = "표정 분석 결과 : \(currentEmotion), 정확도 : \(String(format: "%.1f", confidence))%"
+        resultLabel.text = "표정 분석 결과 : \(resultDescription), 정확도 : \(String(format: "%.1f", confidence))%"
         
         let labels = [emotionLabel1, emotionLabel2, emotionLabel3, emotionLabel4, emotionLabel5, emotionLabel6, emotionLabel7]
         
